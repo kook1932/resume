@@ -4,18 +4,22 @@
 
 ## 📌 프로젝트 및 상세 업무
 
-### **OmniCon (AI 기반 컨퍼런스 플랫폼)**  
+### **모두의 컨퍼런스 | OmniCnf**  
 **개인 프로젝트 | Side Project**  
-**기간**: 2023 - 현재  
+**기간**: 2024.10 - 현재  
+
+**💡 프로젝트 개요**
+- 모두의 컨퍼런스(OmniCnf)는 Spring AI를 활용한 개발자 컨퍼런스 영상 요약 및 검색 서비스입니다.
+- 유튜브에 업로드된 컨퍼런스 영상을 OpenAI API 와 pgvector 를 활용해 분석/저장/검색하고, 사용자가 원하는 내용을 쉽고 빠르게 조회할 수 있도록 구현하였습니다.
 
 **🔧 기술 스택**  
-- **Backend**: Java 17, Spring Boot 3.x, PostgreSQL, pgvector, OpenAI API, Spring AI  
+- **Backend**: Java 17, Spring Boot 3.3.4, JPA, QueryDSL, postgresql, pgvector, OpenAI API, Spring AI  
 - **Frontend**: Next.js, React  
 - **Infra**: Docker, Docker Compose, AWS, Nginx, GitHub Actions  
 
-**💡 주요 구현 내용**  
-- **AI 기반 영상 요약**: OpenAI API와 Spring AI를 활용해 컨퍼런스 영상 요약  
-- **Embedding 검색 기능**: pgvector와 OpenAI Embedding API를 활용한 유사 검색  
+**📌 주요 구현 내용**  
+- **AI 기반 영상 요약**: OpenAI API 와 Spring AI를 활용해 컨퍼런스 영상 요약  
+- **Embedding 검색 기능**: pgvector 와 OpenAI Embedding API 를 활용한 유사 검색  
 - **SSR(서버 사이드 렌더링) 기반 SEO 최적화**: Next.js로 반응형 웹 애플리케이션 구현  
 - **Docker 기반 배포 및 GitHub Actions CI/CD 구축**: 자동화된 빌드와 배포 환경 구축  
 
