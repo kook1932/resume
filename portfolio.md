@@ -2,9 +2,9 @@
 
 ---
 
-## 📌 프로젝트 및 상세 업무
+## 📌 프로젝트 및 상세 내용
 
-### **모두의 컨퍼런스 | OmniCnf**  
+### **[모두의 컨퍼런스 | OmniCnf](https://omnicnf.com)**  
 **개인 프로젝트 | Side Project**  
 **기간**: 2024.10 - 현재  
 
@@ -13,46 +13,93 @@
 - 유튜브에 업로드된 컨퍼런스 영상을 OpenAI API 와 pgvector 를 활용해 분석/저장/검색하고, 사용자가 원하는 내용을 쉽고 빠르게 조회할 수 있도록 구현하였습니다.
 
 **🔧 기술 스택**  
-- **Backend**: Java 17, Spring Boot 3.3.4, JPA, QueryDSL, postgresql, pgvector, OpenAI API, Spring AI  
+- **Backend**: Java 17, Spring Boot 3.3.4, JPA, QueryDSL, postgreSQL, pgvector, OpenAI API, Spring AI  
 - **Frontend**: Next.js, React  
 - **Infra**: Docker, Docker Compose, AWS, Nginx, GitHub Actions  
 
 **📌 주요 구현 내용**  
-- **AI 기반 영상 요약**: OpenAI API 와 Spring AI를 활용해 컨퍼런스 영상 요약  
-- **Embedding 검색 기능**: pgvector 와 OpenAI Embedding API 를 활용한 유사 검색  
-- **SSR(서버 사이드 렌더링) 기반 SEO 최적화**: Next.js로 반응형 웹 애플리케이션 구현  
-- **Docker 기반 배포 및 GitHub Actions CI/CD 구축**: 자동화된 빌드와 배포 환경 구축  
+- **AI 기반 영상 요약**  
+  - OmniCnf 에서는 OpenAI API 와 Spring AI를 활용하여 개발자 컨퍼런스 영상을 자동 요약하는 기능을 구현했습니다. 컨퍼런스 발표 영상을 OpenAI GPT 모델에 요청하여 핵심 요약문을 생성했습니다.
+  - 또한 영상 요약의 품질을 높이기 위해 다양한 프롬프트 엔지니어링 기법을 도입하였으며, Spring AI를 활용하여 GPT 응답값을 Class 로 Convert 하여 AI 의 응답값을 항상 동일하게 유지하면서 사용했습니다.
+  - 위 기능을 통해 사용자는 장시간 영상을 시청하지 않고도 핵심 내용을 빠르게 파악할 수 있으며, 다른 컨퍼런스들과 비교하여 자신에게 필요한 정보를 빠르게 찾아볼 수 있습니다.
+- **Embedding 검색 기능**  
+  - OmniCnf 에서는 pgvector 와 OpenAI Embedding API 를 활용하여 유사 컨퍼런스 검색 기능을 구현했습니다.
+  - 컨퍼런스 영상의 제목, 설명, 키워드 등을 벡터화(Embedding) 하여 PostgreSQL의 pgvector 확장 기능에 저장하였고,
+    사용자의 검색 요청을 벡터로 변환하여 코사인 유사도(Cosine Similarity) 기반으로 가장 유사한 컨퍼런스 영상과 키워드를 검색할 수 있도록 설계했습니다.
+  - 기존의 검색 방식(DB, Engine)보다 의미론적(Semantic) 검색이 가능하여, 사용자가 보다 직관적이고 유연한 검색 경험을 할 수 있도록 개선되었습니다.
+    또한, 검색 결과를 정렬할 때는 벡터 연산 속도를 최적화하기 위해 Indexing 기법을 활용하여 쿼리 응답 속도를 최소화했습니다.
+- **Test 코드, Test 커버리지**
+  - OmniCnf 의 AI 모델 및 API 통신 테스트는 MockServer 를 활용하여 수행되었습니다.
+  - OpenAI API 와 같은 외부 API를 직접 호출하는 것은 테스트 환경에서 비용과 응답 속도, API 요청 제한 등의 문제를 야기할 수 있기 때문에, 이를 방지하기 위해 MockServer 를 활용한 테스트 환경을 구축하였습니다.
+    MockServer 는 실제 OpenAI API 응답과 동일한 형식의 데이터를 반환하도록 설정하였으며, 이를 통해 API 호출 로직이 정상적으로 동작하는지, 오류 발생 시 예외 처리가 올바르게 이루어지는지를 검증하였습니다.
+  - 또한, 서비스 전반에 대한 단위 테스트(Unit Test)와 통합 테스트(Integration Test)를 수행하여, 테스트 커버리지를 지속적으로 모니터링하고 80% 이상의 커버리지를 유지하도록 관리했습니다.
+- **JWT 인증**
+  - OmniCnf 에서는 JWT(JSON Web Token) 기반의 인증 시스템을 도입하여 사용자의 보안성을 강화하고 서버 부하를 줄이는 Stateless 인증 방식을 적용했습니다.
+  - front-end(Next.js) 서버에서 Google OAuth2 와 통신,인증 책임을 갖고, back-end(SpringBoot) 는 access,refresh token 발급/검증/조회 책임을 갖도록 했습니다. 
+    이로써 단일책임을 준수하고 결합도를 낮춘 아키텍처로 개발했습니다.   
+  - 사용자가 로그인하면 Access Token과 Refresh Token을 발급하며, Access Token은 짧은 유효기간을 갖도록 하고, Refresh Token을 통해 안전하게 세션을 연장할 수 있도록 설계했습니다.
+    또한, JWT를 사용하여 각 API 요청에서 불필요한 세션 저장소(DB) 접근을 최소화하고, 권한을 세분화하여 사용자 역할(Role-Based Access Control, RBAC) 기반의 접근 제어를 구현했습니다.
+  - 이를 통해 관리자, 일반 사용자, 게스트 등의 권한을 구분하여 API 접근을 관리할 수 있으며, JWT 서명을 활용한 Payload 변조 방지를 적용하여 보안성을 한층 강화했습니다.
+- **SOLID 원칙을 준수하여 코드 유지보수성 향상**
+  - OmniCnf 에서는 유지보수성과 확장성을 높이기 위해 SOLID 원칙을 준수하는 코드 구조를 설계했습니다.
+    특히, **DIP(Dependency Inversion Principle, 의존성 역전 원칙)**과 **OCP(Open-Closed Principle, 개방-폐쇄 원칙)**을 적극적으로 적용하였습니다.
+  - DIP 적용:
+    서비스 계층에서 구체적인 구현체가 아닌 인터페이스(Interface)에 의존하도록 설계하여,
+    향후 AI 요약 API가 변경되거나 추가될 경우에도 코드 수정 없이 새로운 기능을 추가할 수 있도록 유연성을 확보했습니다.
+  - OCP 적용:
+    AI 모델이 발전함에 따라 기존 OpenAI API 외에도 다른 AI API(예: Claude, Gemini)를 지원할 수 있도록 확장성 있는 구조로 개발했습니다.
+    새로운 AI 모델을 추가할 때 기존 코드를 수정하는 것이 아니라 새로운 구현체를 추가하기만 하면 동작하도록 설계하여, 코드의 안정성을 유지하면서도 기능 확장을 유연하게 진행할 수 있도록 구조화했습니다.
+- **Docker 기반 배포** 
+  - OmniCnf 은 Docker 와 Docker Compose 를 활용하여 컨테이너 기반의 배포 환경을 구축했습니다.
+  - 개발 환경, 스테이징, 운영 환경 간의 차이를 최소화하기 위해 모든 서비스(Backend, Frontend, DB, Nginx)를 개별 컨테이너로 관리하도록 구성했습니다.
+    Docker Compose 를 활용하여 다중 컨테이너 간 네트워크를 설정하고, 개발 환경에서는 로컬에서 손쉽게 실행할 수 있도록 .env 파일을 활용한 환경 변수 기반 설정을 도입했습니다.
+  - 이를 통해 어느 환경에서든 일관된 서비스 배포가 가능하며, 배포 과정에서 발생할 수 있는 환경별 설정 문제를 최소화할 수 있었습니다.
+- **GitHub Actions CI/CD 구축**
+  - OmniCnf 은 자동화된 배포 시스템을 구축하기 위해 GitHub Actions 를 활용하였습니다.
+  - 코드가 main 브랜치에 Merge 되면 Github 내에서 자동으로 빌드 및 테스트가 실행되며, 배포 과정에서 Docker 이미지 빌드 후 AWS EC2로 배포하도록 설계되었습니다.
+  - 이를 통해 배포 프로세스를 단순화하고, 안정성을 확보하여 빠른 기능 배포가 가능하도록 구성했습니다.
+- **SSR(서버 사이드 렌더링) 기반 SEO 최적화**  
+  - OmniCnf 의 프론트엔드는 Next.js를 활용하여 서버 사이드 렌더링(SSR)을 적용하였습니다.
+  - SSR 을 적용함으로써 초기 페이지 로드 시 HTML 컨텐츠를 미리 렌더링하여 검색 엔진 크롤러가 쉽게 인덱싱할 수 있도록 개선했습니다. 
+    이를 통해 구글 및 네이버 검색 결과에서 OmniCnf 의 컨텐츠가 더욱 높은 가시성을 확보할 수 있었습니다.
+  - 또한, meta 태그와 Open Graph Protocol 을 동적으로 설정하여, 소셜 미디어 공유 시에도 컨퍼런스 정보가 올바르게 노출될 수 있도록 구성하였습니다.
 
 ---
 
 ### **회사 프로젝트 상세 내용**  
+
+**주식회사 웅진컴퍼스 | IT개발팀 대리**
+> - **비회원 결제 기능 개발**: 쿠폰 발급, 결제 요청, 채팅 채널 생성 및 메시지 전송, SMS 및 Push 알림 구현
+>   - 1건씩 발송되던 알림톡 모듈을 대량의 비회원에게 결제 URL 전송을 위해 bulk 모듈로 개선하여 전송 시간 단축
+>   - 회원과 비회원의 결제 프로세스에 대한 공통 API와 별도 API를 설계하면서, 인터페이스 일관성과 명확한 문서화를 통해 타 서비스와의 연동 및 확장성을 고려한 설계
+---
 **(주) 배컴 | 개발팀 매니저**
 
 **1. 선물하기 기능 개발**  
-- 쿠폰 발급, 결제 요청, 채팅 채널 생성 및 메시지 전송, SMS 및 Push 알림 구현  
-- 논리적인 Transaction 관리 및 보상 트랜잭션 처리  
-- JWT 인증 및 Binary 응답 방식 적용으로 보안성 강화  
+>- 쿠폰 발급, 결제 요청, 채팅 채널 생성 및 메시지 전송, SMS 및 Push 알림 구현  
+>- 논리적인 Transaction 관리 및 보상 트랜잭션 처리  
+>- JWT 인증 및 Binary 응답 방식 적용으로 보안성 강화  
 
 **2. 결제 기능 개발 및 안정화**  
-- 네이버페이, 토스 계좌이체 연동 및 결제 중복 방지 로직 구현  
-- MQ(Message Queue) 기반 아키텍처 적용으로 데이터 유실 방지  
+>- 네이버페이, 토스 계좌이체 연동 및 결제 중복 방지 로직 구현  
+>- MQ(Message Queue) 기반 아키텍처 적용으로 데이터 유실 방지  
 
 **3. 검색 엔진 연동 및 성능 개선**  
-- 100만 개 이상의 Feed 데이터를 대상으로 검색 기능 개발  
-- DB LIKE 연산을 검색엔진 기반으로 변경하여 성능 2000% 개선  
+> - 1000만 개 이상의 Feed 데이터를 대상으로 검색 기능 개발  
+> - DB LIKE 연산을 검색엔진 기반으로 변경하여 성능 2000% 개선  
 
 ---
 
 **(주) 더즈인터랙티브 | 선임 연구원**
 
 **1. 소셜 로그인 기능 개발**  
-- Spring Security, OAuth2를 활용한 로그인/회원가입 구현  
-- Custom Annotation 및 HandlerMethodArgumentResolver 적용으로 코드 중복 제거  
+> - Spring Security, OAuth2를 활용한 로그인/회원가입 구현  
+> - Custom Annotation 및 HandlerMethodArgumentResolver 적용으로 코드 중복 제거  
 
 **2. CI/CD 자동화 구축**  
-- 기존 FTP 배포 방식 → GitHub, Jenkins 기반의 CI/CD 파이프라인 구축  
-- React + Spring Boot 통합 빌드 프로세스 개선  
+> - 기존 FTP 배포 방식 → GitHub, Jenkins 기반의 CI/CD 파이프라인 구축  
+> - React + Spring Boot 통합 빌드 프로세스 개선  
 
 **3. SMTP 보안 취약점 개선**  
-- Man-in-the-Middle 공격 방지를 위한 RSA 암호화 적용  
-- Proxy 툴을 통한 메일 변조 방지를 위한 클라이언트 공개키 암호화 적용
+> - Man-in-the-Middle 공격 방지를 위한 RSA 암호화 적용  
+> - Proxy 툴을 통한 메일 변조 방지를 위한 클라이언트 공개키 암호화 적용
